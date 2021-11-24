@@ -4,7 +4,7 @@
   "tags": ["pamsoft grid"],
   "authors": ["tercen"],
   "urls": ["https://github.com/tercen/pg_plsda_classifier_operator"],
-  "container": "tercen/pg_plsda_classifier_operator:0.0.3",
+  "container": "tercen/pg_plsda_classifier_operator:0.0.4",
    "properties": [
    {
     "kind": "DoubleProperty",
@@ -21,7 +21,7 @@
     },
     
     {
-    "kind": "EnumerateProperty",
+    "kind": "EnumeratedProperty",
     "name": "Autoscale",
     "defaultValue":"Yes"",
     "values":[
@@ -32,7 +32,7 @@
     },
     
     {
-    "kind": "EnumerateProperty",
+    "kind": "EnumeratedProperty",
     "name": "Bagging",
     "defaultValue":"Bootstrap",
     "values":[
@@ -52,7 +52,7 @@
     },
     
     {
-    "kind": "EnumerateProperty",
+    "kind": "EnumeratedProperty",
     "name": "CrossValidation",
     "defaultValue":"LOOCV",
     "values":[
@@ -65,7 +65,7 @@
     },
     
     {
-    "kind": "EnumerateProperty",
+    "kind": "EnumeratedProperty",
     "name": "Optimization",
     "defaultValue":"auto",
     "values":[
