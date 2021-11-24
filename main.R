@@ -17,7 +17,7 @@ get_operator_props <- function(ctx, imagesFolder){
   
   AutoScale <- "yes"
   Bagging <- "Bootstrap"
-  NumberOfBags <- 24
+  NumberOfBags <- -1
   CrossValidation <- "LOOCV"
   Optimization<- "auto"
   QuantitationType <- "median"
@@ -30,8 +30,24 @@ get_operator_props <- function(ctx, imagesFolder){
       MaxComponents <- as.numeric(prop$value)
     }
     
-    if (prop$name == "Permutations"){
-      Permutations <- as.numeric(prop$value)
+    if (prop$name == "AutoScale"){
+      AutoScale <- prop$value
+    }
+    
+    if (prop$name == "Bagging"){
+      Bagging <- prop$value
+    }
+    
+    if (prop$name == "NumberOfBags"){
+      NumberOfBags <- as.numeric(prop$value)
+    }
+    
+    if (prop$name == "CrossValidation"){
+      CrossValidation <- prop$value
+    }
+    
+    if (prop$name == "Optimization"){
+      Optimization <- prop$value
     }
   }
   
@@ -41,6 +57,10 @@ get_operator_props <- function(ctx, imagesFolder){
   
   if( is.null(Permutations) || Permutations == -1 ){
     Permutations <- 5
+  }
+  
+  if( is.null(NumberOfBags) || NumberOfBags == -1 ){
+    NumberOfBags <- 24
   }
   
   
