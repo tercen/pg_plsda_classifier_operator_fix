@@ -4,7 +4,7 @@
   "tags": ["pamsoft grid"],
   "authors": ["tercen"],
   "urls": ["https://github.com/tercen/pg_plsda_classifier_operator"],
-  "container": "tercen/pg_plsda_classifier_operator:0.0.4",
+  "container": "tercen/pg_plsda_classifier_operator:latest",
    "properties": [
    {
     "kind": "DoubleProperty",
@@ -23,11 +23,11 @@
     {
     "kind": "EnumeratedProperty",
     "name": "Autoscale",
-    "defaultValue":"Yes"",
+    "defaultValue":"Yes",
     "values":[
       "Yes",
       "No"
-    ]
+    ],
     "description": ""
     },
     
@@ -40,7 +40,7 @@
       "Balance",
       "Bootstrap",
       "Jackknife"
-    ]
+    ],
     "description": ""
     },
     
@@ -60,7 +60,7 @@
       "LOOCV",
       "10-fold",
       "20-fold"
-    ]
+    ],
     "description": ""
     },
     
@@ -74,7 +74,7 @@
       "LOOCV",
       "10-fold",
       "20-fold"
-    ]
+    ],
     "description": ""
     }
   ]

@@ -48,10 +48,6 @@ jobs:
         if: env.TERCEN_VERSION == 'main'
       - name: docker minor tag version
         run: |
-          docker tag tercen/pg_plsda_classifier_operator tercen/pg_plsda_classifier_operator:${TERCEN_MAJOR}
-          docker push tercen/pg_plsda_classifier_operator:${TERCEN_MAJOR}
-          docker tag tercen/pg_plsda_classifier_operator tercen/pg_plsda_classifier_operator:${TERCEN_MAJOR}.${TERCEN_MINOR}
-          docker push tercen/pg_plsda_classifier_operator:${TERCEN_MAJOR}.${TERCEN_MINOR}
           docker tag tercen/pg_plsda_classifier_operator tercen/pg_plsda_classifier_operator:${TERCEN_MAJOR}.${TERCEN_MINOR}.${TERCEN_PATCH}
           docker push tercen/pg_plsda_classifier_operator:${TERCEN_MAJOR}.${TERCEN_MINOR}.${TERCEN_PATCH}
         if: env.TERCEN_PATCH != ''
