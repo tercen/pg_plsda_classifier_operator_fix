@@ -216,6 +216,8 @@ join2 = tbl2 %>%
   as_relation() %>%
   as_join_operator(list(), list())
 
-join2 %>%  
+list(join1, join2) %>%
   save_relation(ctx)
 
+# join2 %>%
+#   save_relation(ctx)
