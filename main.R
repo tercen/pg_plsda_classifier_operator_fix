@@ -9,6 +9,14 @@ MCR_PATH <- "/opt/mcr/v99"
 MATCALL  <- "/mcr/exe/run_plsda.sh"
 # =============================================
 
+# http://127.0.0.1:5402/admin/w/64c13d425852ec95487a08924a0025d0/ds/ecc4629b-0165-4e1d-86a5-036e845f1db5
+#options("tercen.workflowId" = "64c13d425852ec95487a08924a0025d0")
+#options("tercen.stepId"     = "ecc4629b-0165-4e1d-86a5-036e845f1db5")
+
+#ADULT
+#http://127.0.0.1:5402/admin/w/64c13d425852ec95487a08924a0025d0/ds/45390a4e-9d46-40bb-8c6f-8121944ac451
+#options("tercen.workflowId" = "64c13d425852ec95487a08924a0025d0")
+#options("tercen.stepId"     = "45390a4e-9d46-40bb-8c6f-8121944ac451")
 
 
 get_operator_props <- function(ctx, imagesFolder){
@@ -21,6 +29,7 @@ get_operator_props <- function(ctx, imagesFolder){
   CrossValidation <- "LOOCV"
   Optimization<- "auto"
   QuantitationType <- "median"
+  DiagnosticPlot <- "Advanced"
   
   
   operatorProps <- ctx$query$operatorSettings$operatorRef$propertyValues
@@ -49,6 +58,15 @@ get_operator_props <- function(ctx, imagesFolder){
     if (prop$name == "Optimization"){
       Optimization <- prop$value
     }
+    
+    if (prop$name == "DiagnosticPlot"){
+      DiagnosticPlot <- prop$value
+    }
+    
+  }
+  
+  if( is.null(DiagnosticPlot) ){
+    DiagnosticPlot <- "Advanced"
   }
   
   if( is.null(MaxComponents) || MaxComponents == -1 ){
@@ -75,6 +93,7 @@ get_operator_props <- function(ctx, imagesFolder){
   props$CrossValidation <- CrossValidation
   props$Optimization<- Optimization
   props$QuantitationType <- QuantitationType
+  props$DiagnosticPlot <- DiagnosticPlot
   
   
   return (props)
@@ -86,7 +105,8 @@ get_operator_props <- function(ctx, imagesFolder){
 classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   outfileVis <- tempfile(fileext = ".mat")
   outfileDat <- tempfile(fileext = ".txt")
-  
+  outfileImg <- tempfile(fileext = ".svg")
+
   
   dfJson = list(list(
     "MaxComponents"=props$MaxComponents, 
@@ -97,6 +117,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     "CrossValidation"=props$CrossValidation,
     "Optimization"=props$Optimization,
     "QuantitationType"=props$QuantitationType,
+    "DiagnosticPlot"=props$DiagnosticPlot,
+    "DiagnosticPlotPath"=outfileImg,
     "RowFactor"=rowColumns[[1]],
     "ColFactor"=arrayColumns[[1]],
     "OutputFileVis"=outfileVis, 
@@ -145,11 +167,17 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   jsonData <- toJSON(dfJson, pretty=TRUE, auto_unbox = TRUE, digits=20)
   
   jsonFile <- tempfile(fileext = ".json")
+  #jsonFile <- '/home/rstudio/projects/pg_plsda_classifier_operator/test.json'
   write(jsonData, jsonFile)
   
+  
+  # NOTE
+  # It is unlikely that the processing takes over 10 minutes to finish,
+  # but if it does, this safeguard needs to be changed
   system2(MATCALL,
-          args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""))
-  # 
+          args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600)
+  
+
   outDf <- as.data.frame( read.csv(outfileDat) )
   outDf <- outDf %>%
     rename(.ci = colSeq) %>%
@@ -160,8 +188,23 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   
   
   outDf2 <- data.frame(
-    model = "model1",
+    model = "plsda_classifier",
     .base64.serialized.r.model = c(tim::serialise_to_string(classifierModel))
+  )
+  
+  
+  output_string <- base64enc::base64encode(
+    readBin(outfileImg, "raw", file.info(outfileImg)[1, "size"]),
+    "txt"
+  )
+  
+
+  output_md <- base64enc::base64encode(charToRaw("# Diagnostic Plot."),"txt")
+  
+  outTf <- tibble::tibble(
+    filename = c("DiagnosticPlot.svg", "svg"),
+    mimetype = c("text/markdown", 'image/svg+xml'),
+    .content = c(output_md,output_string)
   )
   
   
@@ -169,8 +212,9 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   unlink(outfileVis)
   unlink(outfileDat)
   unlink(jsonFile)
+  unlink(outfileImg)
   
-  return( list(outDf, outDf2) )
+  return( list(outDf, outDf2, outTf) )
 }
 
 
@@ -224,9 +268,10 @@ tableList <- df %>%
 
 tbl1 <- tableList[[1]]
 tbl2 <- tableList[[2]]
-
+tbl3 <- tableList[[3]]
 
 join1 = tbl1 %>% 
+  ctx$addNamespace() %>%
   as_relation() %>%
   left_join_relation(ctx$crelation, ".ci", ctx$crelation$rids) %>%
   as_join_operator(ctx$cnames, ctx$cnames)
@@ -236,8 +281,11 @@ join2 = tbl2 %>%
   as_relation() %>%
   as_join_operator(list(), list())
 
-list(join1, join2) %>%
-  save_relation(ctx)
+join3 = tbl3 %>% 
+  ctx$addNamespace() %>%
+  as_relation() %>%
+  as_join_operator(list(), list())
 
-# join2 %>%
-#   save_relation(ctx)
+
+list(join1, join2, join3) %>%
+  save_relation(ctx)

@@ -1,4 +1,4 @@
-FROM tercen/pg_plsda:1.0.1
+FROM tercen/pg_plsda:1.0.2
 
 ENV RENV_VERSION 0.13.2
 

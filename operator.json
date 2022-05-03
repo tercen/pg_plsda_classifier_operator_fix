@@ -76,6 +76,18 @@
       "20-fold"
     ],
     "description": ""
+    },
+    
+    {
+    "kind": "EnumeratedProperty",
+    "name": "Diagnostic Plot",
+    "defaultValue":"Advanced",
+    "values":[
+      "None",
+      "Basic",
+      "Advanced"
+    ],
+    "description": ""
     }
   ]
 }
