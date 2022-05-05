@@ -109,9 +109,9 @@ get_operator_props <- function(ctx, imagesFolder){
 classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   baseName <- '/tmp/hhh'
   
-  outfileVis <- paste0(baseName, '.mat') #tempfile(fileext = ".mat")
-  outfileDat <- paste0(baseName, '.txt') #tempfile(fileext = ".txt")
-  outfileImg <- paste0(baseName, '.svg') #tempfile(fileext = ".svg")
+  outfileVis <- tempfile(fileext = ".mat")
+  outfileDat <- tempfile(fileext = ".txt")
+  outfileImg <- tempfile(fileext = ".svg")
 
   
   dfJson = list(list(
@@ -172,8 +172,7 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   
   jsonData <- toJSON(dfJson, pretty=TRUE, auto_unbox = TRUE, digits=20)
   
-  #jsonFile <- tempfile(fileext = ".json")
-  jsonFile <- paste0(baseName, '.json')
+  jsonFile <- tempfile(fileext = ".json")
   #jsonFile <- '/home/rstudio/projects/pg_plsda_classifier_operator/test.json'
   write(jsonData, jsonFile)
   
@@ -181,10 +180,11 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   # NOTE
   # It is unlikely that the processing takes over 10 minutes to finish,
   # but if it does, this safeguard needs to be changed
-  system2(MATCALL,
-          args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600)
+  x<-system2(MATCALL,
+          args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600,
+          stderr = TRUE, stdout = TRUE)
   
-
+  print(x)
   outDf <- as.data.frame( read.csv(outfileDat) )
   outDf <- outDf %>%
     rename(.ci = colSeq) %>%
