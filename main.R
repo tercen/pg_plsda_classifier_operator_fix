@@ -10,8 +10,8 @@ MATCALL  <- "/mcr/exe/run_plsda.sh"
 # =============================================
 
 # http://127.0.0.1:5402/test-team/w/bddd3c84d46cb31435843a71c207aff5/ds/6741c225-bbc6-4ecb-ab04-8390c856d0c0
-# options("tercen.workflowId" = "bddd3c84d46cb31435843a71c207aff5")
-# options("tercen.stepId"     = "6741c225-bbc6-4ecb-ab04-8390c856d0c0")
+#options("tercen.workflowId" = "bddd3c84d46cb31435843a71c207aff5")
+#options("tercen.stepId"     = "6741c225-bbc6-4ecb-ab04-8390c856d0c0")
 
 # http://127.0.0.1:5402/admin/w/64c13d425852ec95487a08924a0025d0/ds/ecc4629b-0165-4e1d-86a5-036e845f1db5
 #options("tercen.workflowId" = "64c13d425852ec95487a08924a0025d0")
@@ -107,9 +107,11 @@ get_operator_props <- function(ctx, imagesFolder){
 
 
 classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
-  outfileVis <- tempfile(fileext = ".mat")
-  outfileDat <- tempfile(fileext = ".txt")
-  outfileImg <- tempfile(fileext = ".svg")
+  baseName <- '/tmp/hhh'
+  
+  outfileVis <- paste0(baseName, '.mat') #tempfile(fileext = ".mat")
+  outfileDat <- paste0(baseName, '.txt') #tempfile(fileext = ".txt")
+  outfileImg <- paste0(baseName, '.svg') #tempfile(fileext = ".svg")
 
   
   dfJson = list(list(
@@ -197,28 +199,30 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   )
   
   
-  output_string <- base64enc::base64encode(
-    readBin(outfileImg, "raw", file.info(outfileImg)[1, "size"]),
-    "txt"
-  )
-  
-
-  output_md <- base64enc::base64encode(charToRaw("# Diagnostic Plot."),"txt")
-  
-  outTf <- tibble::tibble(
-    filename = c("DiagnosticPlot.svg", "svg"),
-    mimetype = c("text/markdown", 'image/svg+xml'),
-    .content = c(output_md,output_string)
-  )
-  
-  
   # Cleanup
   unlink(outfileVis)
   unlink(outfileDat)
   unlink(jsonFile)
-  unlink(outfileImg)
   
-  return( list(outDf, outDf2, outTf) )
+  if(props$DiagnosticPlot != 'None'){
+    output_string <- base64enc::base64encode(
+      readBin(outfileImg, "raw", file.info(outfileImg)[1, "size"]),
+      "txt"
+    )
+    
+  
+    output_md <- base64enc::base64encode(charToRaw("# Diagnostic Plot."),"txt")
+    
+    outTf <- tibble::tibble(
+      filename = c("DiagnosticPlot.svg", "svg"),
+      mimetype = c("text/markdown", 'image/svg+xml'),
+      .content = c(output_md,output_string)
+    )
+    unlink(outfileImg)
+    return( list(outDf, outDf2, outTf) )
+  }else{
+    return( list(outDf, outDf2) )
+  }
 }
 
 
@@ -267,7 +271,7 @@ tableList <- df %>%
 
 tbl1 <- tableList[[1]]
 tbl2 <- tableList[[2]]
-tbl3 <- tableList[[3]]
+
 
 join1 = tbl1 %>% 
   ctx$addNamespace() %>%
@@ -280,11 +284,23 @@ join2 = tbl2 %>%
   as_relation() %>%
   as_join_operator(list(), list())
 
-join3 = tbl3 %>% 
-  ctx$addNamespace() %>%
-  as_relation() %>%
-  as_join_operator(list(), list())
 
 
-list(join1, join2, join3) %>%
-  save_relation(ctx)
+if(props$DiagnosticPlot != 'None'){
+  tbl3 <- tableList[[3]]  
+  
+  join3 = tbl3 %>% 
+    ctx$addNamespace() %>%
+    as_relation() %>%
+    as_join_operator(list(), list())
+  
+  list(join1, join2, join3) %>%
+    save_relation(ctx)
+  
+}else{
+  list(join1, join2) %>%
+    save_relation(ctx)
+  
+}
+
+
