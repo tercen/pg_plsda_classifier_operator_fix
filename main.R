@@ -9,6 +9,10 @@ MCR_PATH <- "/opt/mcr/v99"
 MATCALL  <- "/mcr/exe/run_plsda.sh"
 # =============================================
 
+# http://127.0.0.1:5402/test-team/w/bddd3c84d46cb31435843a71c207aff5/ds/6741c225-bbc6-4ecb-ab04-8390c856d0c0
+# options("tercen.workflowId" = "bddd3c84d46cb31435843a71c207aff5")
+# options("tercen.stepId"     = "6741c225-bbc6-4ecb-ab04-8390c856d0c0")
+
 # http://127.0.0.1:5402/admin/w/64c13d425852ec95487a08924a0025d0/ds/ecc4629b-0165-4e1d-86a5-036e845f1db5
 #options("tercen.workflowId" = "64c13d425852ec95487a08924a0025d0")
 #options("tercen.stepId"     = "ecc4629b-0165-4e1d-86a5-036e845f1db5")
@@ -230,18 +234,13 @@ rowNames  <- ctx$rnames
 colorCols <- ctx$colors
 
 
-
-
 df <- ctx$select(c(".ci", ".ri", ".y", colorCols))
-
-
 
 cTable <- ctx$cselect()
 rTable <- ctx$rselect()
 
 names.with.dot <- names(cTable)
 names.without.dot <- names.with.dot
-
 
 for( i in seq_along(names.with.dot) ){
   names.without.dot[i] <- gsub("\\.", "_", names.with.dot[i])
