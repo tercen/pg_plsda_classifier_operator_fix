@@ -172,7 +172,7 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   
   jsonData <- toJSON(dfJson, pretty=TRUE, auto_unbox = TRUE, digits=20)
   
-  jsonFile <- tempfile(fileext = ".json")
+  #jsonFile <- tempfile(fileext = ".json")
   jsonFile <- paste0(baseName, '.json')
   #jsonFile <- '/home/rstudio/projects/pg_plsda_classifier_operator/test.json'
   write(jsonData, jsonFile)
