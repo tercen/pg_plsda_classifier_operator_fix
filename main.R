@@ -180,11 +180,11 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   # NOTE
   # It is unlikely that the processing takes over 10 minutes to finish,
   # but if it does, this safeguard needs to be changed
-  x<-system2(MATCALL,
+  x<-system(MATCALL,
           args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600,
-          stderr = TRUE, stdout = TRUE)
+          intern=TRUE)
   
-  print(x)
+  
   outDf <- as.data.frame( read.csv(outfileDat) )
   outDf <- outDf %>%
     rename(.ci = colSeq) %>%
