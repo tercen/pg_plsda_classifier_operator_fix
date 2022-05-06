@@ -107,10 +107,8 @@ get_operator_props <- function(ctx, imagesFolder){
 
 
 classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
-  baseName <- '/tmp/hhh'
-  
-  outfileVis <- tempfile(fileext = ".mat")
-  outfileDat <- tempfile(fileext = ".txt")
+  outfileMat <- tempfile(fileext = ".mat")
+  outfileTxt <- tempfile(fileext = ".txt")
   outfileImg <- tempfile(fileext = ".svg")
 
   
@@ -127,8 +125,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     "DiagnosticPlotPath"=outfileImg,
     "RowFactor"=rowColumns[[1]],
     "ColFactor"=arrayColumns[[1]],
-    "OutputFileVis"=outfileVis, 
-    "OutputFileDat"=outfileDat )
+    "OutputFileMat"=outfileMat, 
+    "OutputFileTxt"=outfileTxt )
   )
   
   
@@ -173,24 +171,27 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   jsonData <- toJSON(dfJson, pretty=TRUE, auto_unbox = TRUE, digits=20)
   
   jsonFile <- tempfile(fileext = ".json")
-  #jsonFile <- '/home/rstudio/projects/pg_plsda_classifier_operator/test.json'
+  
   write(jsonData, jsonFile)
   
   
   # NOTE
   # It is unlikely that the processing takes over 10 minutes to finish,
   # but if it does, this safeguard needs to be changed
-  x<-system(MATCALL,
+  so <- system2(MATCALL,
           args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600,
-          intern=TRUE)
+          stdout=TRUE)
   
+  stop(so)
   
-  outDf <- as.data.frame( read.csv(outfileDat) )
+
+  #TODO : CHECK why the text file is not coming out of the matlab program
+  outDf <- as.data.frame( read.csv(outfileTxt) )
   outDf <- outDf %>%
     rename(.ci = colSeq) %>%
     rename(.ri = rowSeq) 
   
-  classifierModel <- readBin(outfileVis, "raw", 10e6)
+  classifierModel <- readBin(outfileMat, "raw", 10e6)
   
   
   
@@ -201,8 +202,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   
   
   # Cleanup
-  unlink(outfileVis)
-  unlink(outfileDat)
+  unlink(outfileMat)
+  unlink(outfileTxt)
   unlink(jsonFile)
   
   if(props$DiagnosticPlot != 'None'){
