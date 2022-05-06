@@ -109,7 +109,7 @@ get_operator_props <- function(ctx, imagesFolder){
 classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   outfileMat <- tempfile(fileext = ".mat")
   outfileTxt <- tempfile(fileext = ".txt")
-  outfileImg <- tempfile(fileext = ".svg")
+  outfileImg <- tempfile(fileext = ".png")
 
   
   dfJson = list(list(
@@ -220,8 +220,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     output_md <- base64enc::base64encode(charToRaw("# Diagnostic Plot."),"txt")
     
     outTf <- tibble::tibble(
-      filename = c("DiagnosticPlot.svg", "svg"),
-      mimetype = c("text/markdown", 'image/svg+xml'),
+      filename = c("DiagnosticPlot.png", "png"),
+      mimetype = c("text/markdown", 'image/png'),
       .content = c(output_md,output_string)
     )
     unlink(outfileImg)
