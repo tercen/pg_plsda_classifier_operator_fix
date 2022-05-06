@@ -182,10 +182,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
           args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600,
           stdout=TRUE)
   
-  stop(so)
-  
 
-  #TODO : CHECK why the text file is not coming out of the matlab program
+
   outDf <- as.data.frame( read.csv(outfileTxt) )
   outDf <- outDf %>%
     rename(.ci = colSeq) %>%
