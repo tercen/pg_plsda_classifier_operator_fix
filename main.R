@@ -63,7 +63,7 @@ get_operator_props <- function(ctx, imagesFolder){
       Optimization <- prop$value
     }
     
-    if (prop$name == "DiagnosticPlot"){
+    if (prop$name == "Diagnostic Plot"){
       DiagnosticPlot <- prop$value
     }
     
@@ -178,12 +178,18 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   # NOTE
   # It is unlikely that the processing takes over 10 minutes to finish,
   # but if it does, this safeguard needs to be changed
-  so <- system2(MATCALL,
-          args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600,
-          stdout=TRUE)
+  ec <- system2(MATCALL,
+          args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600)
+
+  # Error code 124 --> Timeout Happened
+  if( ec == 124 ){
+    stop(
+      "Process Timed out\n
+      \n
+      HINT: Try increasing memory or CPU's for the operator"
+    )
+  }
   
-
-
   outDf <- as.data.frame( read.csv(outfileTxt) )
   outDf <- outDf %>%
     rename(.ci = colSeq) %>%
@@ -294,7 +300,7 @@ if(props$DiagnosticPlot != 'None'){
     as_relation() %>%
     as_join_operator(list(), list())
   
-  list(join1, join2, join3) %>%
+  list(join3, join1, join2) %>%
     save_relation(ctx)
   
 }else{
