@@ -4,7 +4,7 @@ Version: 2.5 (MCR R2016A)
 Creator: Rik de Wijn
 Last Modification Date: March 22, 2016
 
-# Description:
+##### Description:
 
 -Partial Least Squared Discriminant Analysis
 -Type: Matlab Operator Step
@@ -32,13 +32,13 @@ Here, the optimization of the number of PLS components is repeated for
 each fold of the cross validation using the training set only (double
 cross validation).
 
-# INPUT:
+#####INPUT:
 
 Array data from Bionavigator Spreadsheet with grouping defined using a single DataColor. 
 Using more than a single value per cell results in an error, missing values are not allowed.
 SpotID's have to specified in the BN spreadsheet
 
-# PARAMETERS
+##### PARAMETERS
 
 1. MaxComponents [10(dft)], the maximum number of PLS-components allowed. 
 2. AutoScale [No(dft), Yes], autoscale spots.
@@ -53,7 +53,7 @@ SpotID's have to specified in the BN spreadsheet
 7. SaveClassifer [no(dft), yes], if yes the Operator prompts the user for
 saving the obtained classifier.
 
-# OUTPUT (RETURNED TO BIONAVIGATOR/TERCEN):
+##### OUTPUT (RETURNED TO BIONAVIGATOR/TERCEN):
 Per sample: 
 y<ClassName>, class affinity for each class predicted using the outer
 cross validation, the predicted class is the one with largest affinity.
@@ -64,7 +64,7 @@ prediction rule. Beta(1..N-1) is usually sufficient. These are scaled to unit va
 weights for predicting new samples, use the complimentary
 predict.classification operator!
 
-# OUTPUT (SHOWRESULTS)
+##### OUTPUT (SHOWRESULTS)
 
 1. Plot of cross validated y predictions in "PamIndex" format (2-group
 classification only)
