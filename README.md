@@ -6,10 +6,10 @@ The `pg_plsda_classifier_operator` is used to create a linear classifier using a
 
 Input projection|.
 ---|---
-`y-axis`        | LFC, continuous data 
-`row`           | ID, categorical, char
-`column`        | Cell.line, categorical, char
-`colors`        | Response, categorical, char 
+`y-axis`        | Values, numerical | values of the predictor variables 
+`row`           | ID, categorical, char| factor(s) that identifies the variables or features
+`column`        | Cell.line, categorical, char| factor(s) that identifies the observations or samples 
+`colors`        | Response, categorical, char | response variable
 
 
 
