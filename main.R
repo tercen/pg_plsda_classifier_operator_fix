@@ -8,27 +8,17 @@ library(tim)
 MCR_PATH <- "/opt/mcr/v99"
 MATCALL  <- "/mcr/exe/run_plsda.sh"
 # =============================================
-
-# http://127.0.0.1:5402/test-team/w/bddd3c84d46cb31435843a71c207aff5/ds/90a72c3d-c18c-4328-b1e2-20dce1052103
+# http://127.0.0.1:5402/test-team/w/bddd3c84d46cb31435843a71c207aff5/ds/6741c225-bbc6-4ecb-ab04-8390c856d0c0
 # options("tercen.workflowId" = "bddd3c84d46cb31435843a71c207aff5")
-# options("tercen.stepId"     = "90a72c3d-c18c-4328-b1e2-20dce1052103")
-
-# http://127.0.0.1:5402/admin/w/64c13d425852ec95487a08924a0025d0/ds/ecc4629b-0165-4e1d-86a5-036e845f1db5
-#options("tercen.workflowId" = "64c13d425852ec95487a08924a0025d0")
-#options("tercen.stepId"     = "ecc4629b-0165-4e1d-86a5-036e845f1db5")
-
-#ADULT
-#http://127.0.0.1:5402/admin/w/64c13d425852ec95487a08924a0025d0/ds/45390a4e-9d46-40bb-8c6f-8121944ac451
-#options("tercen.workflowId" = "64c13d425852ec95487a08924a0025d0")
-#options("tercen.stepId"     = "45390a4e-9d46-40bb-8c6f-8121944ac451")
+# options("tercen.stepId"     = "6741c225-bbc6-4ecb-ab04-8390c856d0c0")
 
 
 get_operator_props <- function(ctx, imagesFolder){
   MaxComponents <- -1
   Permutations   <- -1
   
-  AutoScale <- "yes"
-  Bagging <- "Bootstrap"
+  AutoScale <- "no"
+  Bagging <- "None"
   NumberOfBags <- -1
   CrossValidation <- "LOOCV"
   Optimization<- "auto"
@@ -74,11 +64,11 @@ get_operator_props <- function(ctx, imagesFolder){
   }
   
   if( is.null(MaxComponents) || MaxComponents == -1 ){
-    MaxComponents <- 2
+    MaxComponents <- 10
   }
   
   if( is.null(Permutations) || Permutations == -1 ){
-    Permutations <- 5
+    Permutations <- 0
   }
   
   if( is.null(NumberOfBags) || NumberOfBags == -1 ){
@@ -173,7 +163,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   jsonFile <- tempfile(fileext = ".json")
   
   write(jsonData, jsonFile)
-  
+  # write(jsonData, 'test.json')
+  # browser()
   
   # NOTE
   # It is unlikely that the processing takes over 10 minutes to finish,
@@ -243,8 +234,9 @@ colNames  <- ctx$cnames
 rowNames  <- ctx$rnames
 colorCols <- ctx$colors
 
-
 df <- ctx$select(c(".ci", ".ri", ".y", colorCols))
+  
+df[[colorCols[[1]]]] <- as.character( df[[colorCols[[1]]]])
 
 cTable <- ctx$cselect() %>%
   mutate_if(is.numeric, as.character)
@@ -266,14 +258,26 @@ names(cTable) <- names.without.dot
 cTable[[".ci"]] = seq(0, nrow(cTable) - 1)
 rTable[[".ri"]] = seq(0, nrow(rTable) - 1)
 
+df = dplyr::left_join(df, cTable, by = ".ci", suffix=c("_col", "_clr") )
+df = dplyr::left_join(df, rTable, by = ".ri", suffix=c("_row", "_clr")) 
 
-df = dplyr::left_join(df, cTable, by = ".ci")
-df = dplyr::left_join(df, rTable, by = ".ri") 
 
+# Issue #4
+# If the same variable is used in color, column and/or row, tehre is an error
+# Because in df those are suffixed, but not in the names.
+# Assumes no more than one variable for each
+if( colorCols[[1]] == colNames[[1]] ){
+  colorCols[[1]] <- paste0( colorCols[[1]], '_clr' )
+  colNames[[1]] <- paste0( colNames[[1]], '_col' )
+}
+
+if( colorCols[[1]] == rowNames[[1]] ){
+  colorCols[[1]] <- paste0( colorCols[[1]], '_clr' )
+  rowNames[[1]] <- paste0( rowNames[[1]], '_row' )
+}
 
 
 props     <- get_operator_props(ctx, imgInfo[1])
-
 
 tableList <- df %>%
   classify(props, unlist(colNames), unlist(rowNames), unlist(colorCols) ) 
@@ -281,12 +285,21 @@ tableList <- df %>%
 tbl1 <- tableList[[1]]
 tbl2 <- tableList[[2]]
 
+crel <- ctx$cselect() %>%
+  mutate(.ci=seq(0,nrow(.)-1)) %>%
+  as_relation()
+
+rrel <- ctx$rselect() %>%
+  mutate(.ri=seq(0,nrow(.)-1)) %>%
+  as_relation()
 
 join1 = tbl1 %>% 
   ctx$addNamespace() %>%
   as_relation() %>%
-  left_join_relation(ctx$crelation, ".ci", ctx$crelation$rids) %>%
-  as_join_operator(ctx$cnames, ctx$cnames)
+  left_join_relation(crel, ".ci", crel$rids) %>%
+  left_join_relation(rrel, ".ri", rrel$rids) %>%
+  as_join_operator(unname(unlist(list(ctx$cnames, ctx$rnames))), 
+                   unname(unlist(list(ctx$cnames, ctx$rnames))) )
 
 join2 = tbl2 %>% 
   ctx$addNamespace() %>%
@@ -303,7 +316,10 @@ if(props$DiagnosticPlot != 'None'){
     as_relation() %>%
     as_join_operator(list(), list())
   
-  list(join3, join1, join2) %>%
+  # list(join3, join1, join2) %>%
+    # save_relation(ctx)
+  
+  list(join1) %>%
     save_relation(ctx)
   
 }else{
