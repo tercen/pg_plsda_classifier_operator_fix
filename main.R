@@ -113,8 +113,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     "QuantitationType"=props$QuantitationType,
     "DiagnosticPlot"=props$DiagnosticPlot,
     "DiagnosticPlotPath"=outfileImg,
-    "RowFactor"=rowColumns[[1]],
-    "ColFactor"=arrayColumns[[1]],
+    "RowFactor"=rowColumns[[  length(rowColumns)  ]],
+    "ColFactor"=arrayColumns[[ length(arrayColumns) ]],
     "OutputFileMat"=outfileMat, 
     "OutputFileTxt"=outfileTxt )
   )
@@ -263,17 +263,21 @@ df = dplyr::left_join(df, rTable, by = ".ri", suffix=c("_row", "_clr"))
 
 
 # Issue #4
-# If the same variable is used in color, column and/or row, tehre is an error
+# If the same variable is used in color, column and/or row, there is an error
 # Because in df those are suffixed, but not in the names.
 # Assumes no more than one variable for each
-if( colorCols[[1]] == colNames[[1]] ){
-  colorCols[[1]] <- paste0( colorCols[[1]], '_clr' )
-  colNames[[1]] <- paste0( colNames[[1]], '_col' )
+for( i in seq(1, length(colNames))){
+  if( colorCols[[1]] == colNames[[i]] ){
+    colorCols[[1]] <- paste0( colorCols[[1]], '_clr' )
+    colNames[[i]] <- paste0( colNames[[i]], '_col' )
+  }
 }
 
-if( colorCols[[1]] == rowNames[[1]] ){
-  colorCols[[1]] <- paste0( colorCols[[1]], '_clr' )
-  rowNames[[1]] <- paste0( rowNames[[1]], '_row' )
+for( i in seq(1, length(rowNames))){
+  if( colorCols[[1]] == rowNames[[i]] ){
+    colorCols[[1]] <- paste0( colorCols[[1]], '_clr' )
+    rowNames[[i]] <- paste0( rowNames[[i]], '_row' )
+  }
 }
 
 
