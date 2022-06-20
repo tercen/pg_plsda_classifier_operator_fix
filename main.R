@@ -320,11 +320,11 @@ if(props$DiagnosticPlot != 'None'){
     as_relation() %>%
     as_join_operator(list(), list())
   
-  # list(join3, join1, join2) %>%
-    # save_relation(ctx)
-  
-  list(join1) %>%
+  list(join3, join1, join2) %>%
     save_relation(ctx)
+  
+  # list(join1) %>%
+    # save_relation(ctx)
   
 }else{
   list(join1, join2) %>%
