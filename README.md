@@ -1,5 +1,5 @@
 # PLSDA Classifier
- 
+
 The `pg_plsda_classifier_operator` is used to create a linear classifier using a Matlab implementation.
 
 ##### Usage
