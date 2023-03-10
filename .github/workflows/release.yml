@@ -36,18 +36,18 @@ jobs:
       - name: docker login
         run: docker login --username ${{ secrets.DOCKER_HUB_USERNAME }} --password ${{ secrets.DOCKER_HUB_PASSWORD }}
       - name: docker build
-        run: docker build -t tercen/pg_plsda_classifier_operator .
+        run: docker build -t pamgene/pg_plsda_classifier_operator .
       - name: docker tag/push COMMIT_NUMBER
         run: |
-          docker tag tercen/pg_plsda_classifier_operator tercen/pg_plsda_classifier_operator:${COMMIT_NUMBER}
-          docker push tercen/pg_plsda_classifier_operator:${COMMIT_NUMBER}
+          docker tag pamgene/pg_plsda_classifier_operator pamgene/pg_plsda_classifier_operator:${COMMIT_NUMBER}
+          docker push pamgene/pg_plsda_classifier_operator:${COMMIT_NUMBER}
       - name: docker tag/push latest
         run: |
-          docker tag tercen/pg_plsda_classifier_operator tercen/pg_plsda_classifier_operator:latest
-          docker push tercen/pg_plsda_classifier_operator:latest
+          docker tag pamgene/pg_plsda_classifier_operator pamgene/pg_plsda_classifier_operator:latest
+          docker push pamgene/pg_plsda_classifier_operator:latest
         if: env.TERCEN_VERSION == 'main'
       - name: docker minor tag version
         run: |
-          docker tag tercen/pg_plsda_classifier_operator tercen/pg_plsda_classifier_operator:${TERCEN_MAJOR}.${TERCEN_MINOR}.${TERCEN_PATCH}
-          docker push tercen/pg_plsda_classifier_operator:${TERCEN_MAJOR}.${TERCEN_MINOR}.${TERCEN_PATCH}
+          docker tag pamgene/pg_plsda_classifier_operator pamgene/pg_plsda_classifier_operator:${TERCEN_MAJOR}.${TERCEN_MINOR}.${TERCEN_PATCH}
+          docker push pamgene/pg_plsda_classifier_operator:${TERCEN_MAJOR}.${TERCEN_MINOR}.${TERCEN_PATCH}
         if: env.TERCEN_PATCH != ''
