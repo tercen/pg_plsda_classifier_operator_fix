@@ -4,7 +4,7 @@
   "tags": ["pamsoft grid"],
   "authors": ["tercen"],
   "urls": ["https://github.com/pamgene/pg_plsda_classifier_operator"],
-  "container": ["pamgene/pg_plsda_classifier_operator:0.1.3"],
+  "container": ["pamgene/pg_plsda_classifier_operator:0.2.0"],
   "properties": [
     {
       "kind": "DoubleProperty",
