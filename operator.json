@@ -9,14 +9,14 @@
     {
       "kind": "DoubleProperty",
       "name": "MaxComponents",
-      "defaultValue": "10",
+      "defaultValue": 10,
       "description": "",
       "values": {}
     },
     {
       "kind": "DoubleProperty",
       "name": "Permutations",
-      "defaultValue": "0",
+      "defaultValue": 0,
       "description": "",
       "values": {}
     },
@@ -37,7 +37,7 @@
     {
       "kind": "DoubleProperty",
       "name": "NumberOfBags",
-      "defaultValue": "24",
+      "defaultValue": 24,
       "description": "",
       "values": {}
     },
