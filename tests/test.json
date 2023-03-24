@@ -17,5 +17,6 @@
       "name": "MaxComponents",
       "value": "3"
     }
-  ]
+  ],
+  "relTol": 1e-05
 }
