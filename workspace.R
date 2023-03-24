@@ -4,31 +4,30 @@ library(dplyr, warn.conflicts = FALSE)
 library(jsonlite)
 
 library(tim)
-
+# TODO crabs long to string
 # CONST definitions
 # FULL
 #http://localhost:5402/admin/w/8f58b953d254dd1a1cf982f03e011ced/ds/f563141d-149c-4318-8b19-2b6b152fb650
 # SHORT
-#http://localhost:5402/admin/w/1fa8ac2c09211bd45071e060ee0791f6/ds/9e862a38-d54e-4fec-b872-9777eb588fa0
-options("tercen.workflowId" = "8f58b953d254dd1a1cf982f03e011ced")
-options("tercen.stepId"     = "f563141d-149c-4318-8b19-2b6b152fb650")
+# http://127.0.0.1:5400/test/w/fa9693eadcf11adb6a2d7ee1940008f2/ds/8a8d9785-50b2-4248-9a60-f4a0338303c7
+options("tercen.workflowId" = "fa9693eadcf11adb6a2d7ee1940008f2")
+options("tercen.stepId"     = "8a8d9785-50b2-4248-9a60-f4a0338303c7")
 # options("tercen.stepId"     = "9e862a38-d54e-4fec-b872-9777eb588fa0")
 MCR_PATH <- "/home/rstudio/mcr/v99"
 MATCALL  <- "/home/rstudio/plsda_exe/run_plsda.sh"
 # =============================================
 
-
-
 get_operator_props <- function(ctx, imagesFolder){
-  MaxComponents <- -1
+  MaxComponents <- 3
   Permutations   <- -1
   
-  AutoScale <- "yes"
-  Bagging <- "Bootstrap"
+  AutoScale <- "no"
+  Bagging <- "None"
   NumberOfBags <- -1
   CrossValidation <- "LOOCV"
   Optimization<- "auto"
   QuantitationType <- "median"
+  DiagnosticPlot <- "Advanced"
   
   
   operatorProps <- ctx$query$operatorSettings$operatorRef$propertyValues
@@ -57,14 +56,23 @@ get_operator_props <- function(ctx, imagesFolder){
     if (prop$name == "Optimization"){
       Optimization <- prop$value
     }
+    
+    if (prop$name == "Diagnostic Plot"){
+      DiagnosticPlot <- prop$value
+    }
+    
+  }
+  
+  if( is.null(DiagnosticPlot) ){
+    DiagnosticPlot <- "Advanced"
   }
   
   if( is.null(MaxComponents) || MaxComponents == -1 ){
-    MaxComponents <- 2
+    MaxComponents <- 10
   }
   
   if( is.null(Permutations) || Permutations == -1 ){
-    Permutations <- 5
+    Permutations <- 0
   }
   
   if( is.null(NumberOfBags) || NumberOfBags == -1 ){
@@ -83,6 +91,7 @@ get_operator_props <- function(ctx, imagesFolder){
   props$CrossValidation <- CrossValidation
   props$Optimization<- Optimization
   props$QuantitationType <- QuantitationType
+  props$DiagnosticPlot <- DiagnosticPlot
   
   
   return (props)
@@ -92,8 +101,9 @@ get_operator_props <- function(ctx, imagesFolder){
 
 
 classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
-  outfileVis <- tempfile(fileext = ".mat")
-  outfileDat <- tempfile(fileext = ".txt")
+  outfileMat <- tempfile(fileext = ".mat")
+  outfileTxt <- tempfile(fileext = ".txt")
+  outfileImg <- tempfile(fileext = ".png")
   
   
   dfJson = list(list(
@@ -105,10 +115,12 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     "CrossValidation"=props$CrossValidation,
     "Optimization"=props$Optimization,
     "QuantitationType"=props$QuantitationType,
-    "RowFactor"=rowColumns[[1]],
-    "ColFactor"=arrayColumns[[1]],
-    "OutputFileVis"=outfileVis, 
-    "OutputFileDat"=outfileDat )
+    "DiagnosticPlot"=props$DiagnosticPlot,
+    "DiagnosticPlotPath"=outfileImg,
+    "RowFactor"=rowColumns[[  length(rowColumns)  ]],
+    "ColFactor"=arrayColumns[[ length(arrayColumns) ]],
+    "OutputFileMat"=outfileMat, 
+    "OutputFileTxt"=outfileTxt )
   )
   
   
@@ -130,17 +142,17 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
                       ))
     )
   }
-
+  
   for( colorCol in colorColumns ){
     dfJson <- append( dfJson,
                       list(list(
                         "name"=colorCol,
                         "type"="color",
                         "data"=pull(df, colorCol)
-                        ))
+                      ))
     )
   }
-
+  
   dfJson <- append( dfJson,
                     list(list(
                       "name"="LFC",
@@ -152,46 +164,66 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   
   jsonData <- toJSON(dfJson, pretty=TRUE, auto_unbox = TRUE, digits=20)
   
-  jsonFile <- "/home/rstudio/projects/pg_plsda_classifier_operator/input.json" #tempfile(fileext = ".json")
-  write(jsonData, jsonFile)
-
-  system2(MATCALL,
-          args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""))
-
+  jsonFile <- tempfile(fileext = ".json")
   
-  # Distinct beta  value per row
-  # Distinct PamIndex per col, repeat for each row
-  outDf <- as.data.frame( read.csv(outfileDat) )
+  write(jsonData, jsonFile)
+  # write(jsonData, 'test.json')
+  # browser()
+  
+  # NOTE
+  # It is unlikely that the processing takes over 10 minutes to finish,
+  # but if it does, this safeguard needs to be changed
+  ec <- system2(MATCALL,
+                args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600)
+  
+  # Error code 124 --> Timeout Happened
+  if( ec == 124 ){
+    stop(
+      "Process Timed out\n
+      \n
+      HINT: Try increasing memory or CPU's for the operator"
+    )
+  }
+  
+  outDf <- as.data.frame( read.csv(outfileTxt) )
   outDf <- outDf %>%
-    filter( rowSeq == 0 ) %>%
-    select( -rowSeq ) %>%
-    rename(.ci = colSeq)
-    
-
-  # outDf <- data.frame(".ci"=0)
-  # classifierJsonDf <- fromJSON( txt = readChar(outfileVis, file.info(outfileVis)$size)  )
-
-  classifierModel <- readBin(outfileVis, "raw", 10e6)
+    rename(.ci = colSeq) %>%
+    rename(.ri = rowSeq) 
+  
+  classifierModel <- readBin(outfileMat, "raw", 10e6)
   
   
   
   outDf2 <- data.frame(
-    model = "model1",
+    model = "plsda_classifier",
     .base64.serialized.r.model = c(tim::serialise_to_string(classifierModel))
   )
   
   
-  # res <- tim::get_serialized_result(
-  #   df = outDf, object = classifierJsonDf, object_name = "classifierJsonDf", ctx = ctx
-  # )
-
-  
   # Cleanup
-  unlink(outfileVis)
-  unlink(outfileDat)
+  unlink(outfileMat)
+  unlink(outfileTxt)
   unlink(jsonFile)
   
-  return( list(outDf, outDf2) )
+  if(props$DiagnosticPlot != 'None'){
+    output_string <- base64enc::base64encode(
+      readBin(outfileImg, "raw", file.info(outfileImg)[1, "size"]),
+      "txt"
+    )
+    
+    
+    output_md <- base64enc::base64encode(charToRaw("# Diagnostic Plot."),"txt")
+    
+    outTf <- tibble::tibble(
+      filename = c("DiagnosticPlot.png", "png"),
+      mimetype = c("text/markdown", 'image/png'),
+      .content = c(output_md,output_string)
+    )
+    unlink(outfileImg)
+    return( list(outDf, outDf2, outTf) )
+  }else{
+    return( list(outDf, outDf2) )
+  }
 }
 
 
@@ -201,26 +233,23 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
 # =====================
 ctx = tercenCtx()
 
-# if (!any(ctx$cnames == "documentId")) stop("Column factor documentId is required") 
-
 
 colNames  <- ctx$cnames
 rowNames  <- ctx$rnames
 colorCols <- ctx$colors
 
-
-
-
 df <- ctx$select(c(".ci", ".ri", ".y", colorCols))
 
+df[[colorCols[[1]]]] <- as.character( df[[colorCols[[1]]]])
 
+cTable <- ctx$cselect() %>%
+  mutate_if(is.numeric, as.character)
+rTable <- ctx$rselect() %>%
+  mutate_if(is.numeric, as.character)
 
-cTable <- ctx$cselect()
-rTable <- ctx$rselect()
 
 names.with.dot <- names(cTable)
 names.without.dot <- names.with.dot
-
 
 for( i in seq_along(names.with.dot) ){
   names.without.dot[i] <- gsub("\\.", "_", names.with.dot[i])
@@ -233,14 +262,30 @@ names(cTable) <- names.without.dot
 cTable[[".ci"]] = seq(0, nrow(cTable) - 1)
 rTable[[".ri"]] = seq(0, nrow(rTable) - 1)
 
+df = dplyr::left_join(df, cTable, by = ".ci", suffix=c("_col", "_clr") )
+df = dplyr::left_join(df, rTable, by = ".ri", suffix=c("_row", "_clr")) 
 
-df = dplyr::left_join(df, cTable, by = ".ci")
-df = dplyr::left_join(df, rTable, by = ".ri") 
+
+# Issue #4
+# If the same variable is used in color, column and/or row, there is an error
+# Because in df those are suffixed, but not in the names.
+# Assumes no more than one variable for each
+for( i in seq(1, length(colNames))){
+  if( colorCols[[1]] == colNames[[i]] ){
+    colorCols[[1]] <- paste0( colorCols[[1]], '_clr' )
+    colNames[[i]] <- paste0( colNames[[i]], '_col' )
+  }
+}
+
+for( i in seq(1, length(rowNames))){
+  if( colorCols[[1]] == rowNames[[i]] ){
+    colorCols[[1]] <- paste0( colorCols[[1]], '_clr' )
+    rowNames[[i]] <- paste0( rowNames[[i]], '_row' )
+  }
+}
 
 
- 
 props     <- get_operator_props(ctx, imgInfo[1])
-
 
 tableList <- df %>%
   classify(props, unlist(colNames), unlist(rowNames), unlist(colorCols) ) 
@@ -248,21 +293,47 @@ tableList <- df %>%
 tbl1 <- tableList[[1]]
 tbl2 <- tableList[[2]]
 
+crel <- ctx$cselect() %>%
+  mutate(.ci=seq(0,nrow(.)-1)) %>%
+  as_relation()
 
-# tbl1 = data.frame(CellLine = c("0","1","2"), Values=c(0.0,1.0,2.0))
-# tbl1 %>% as_relation()
-# tbl1 %>% as_relation() %>% as_join_operator(c('CellLine'), c('CellLine'))
+rrel <- ctx$rselect() %>%
+  mutate(.ri=seq(0,nrow(.)-1)) %>%
+  as_relation()
 
 join1 = tbl1 %>% 
+  ctx$addNamespace() %>%
   as_relation() %>%
-  left_join_relation(ctx$crelation, ".ci", ctx$crelation$rids) %>%
-  as_join_operator(ctx$cnames, ctx$cnames)
+  left_join_relation(crel, ".ci", crel$rids) %>%
+  left_join_relation(rrel, ".ri", rrel$rids) %>%
+  as_join_operator(unname(unlist(list(ctx$cnames, ctx$rnames))), 
+                   unname(unlist(list(ctx$cnames, ctx$rnames))) )
 
 join2 = tbl2 %>% 
   ctx$addNamespace() %>%
   as_relation() %>%
   as_join_operator(list(), list())
 
-join2 %>%  
-  save_relation(ctx)
+
+
+if(props$DiagnosticPlot != 'None'){
+  tbl3 <- tableList[[3]]  
+  
+  join3 = tbl3 %>% 
+    ctx$addNamespace() %>%
+    as_relation() %>%
+    as_join_operator(list(), list())
+  
+  list(join3, join1, join2) %>%
+    save_relation(ctx)
+  
+  # list(join1) %>%
+  # save_relation(ctx)
+  
+}else{
+  list(join1, join2) %>%
+    save_relation(ctx)
+  
+}
+
 
