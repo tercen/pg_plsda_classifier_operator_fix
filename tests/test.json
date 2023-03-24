@@ -10,7 +10,7 @@
   "labels": [],
   "yAxis": "measurement",
   "xAxis": "",
-  "skipColumns":[".content"],
+  "skipColumns":[".content", ".base64.serialized.r.model"],
   "propertyValues":[
     {
       "kind": "PropertyValue",
