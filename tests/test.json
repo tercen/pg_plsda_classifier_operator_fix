@@ -11,7 +11,7 @@
   "yAxis": "measurement",
   "xAxis": "",
   "skipColumns":[".content"],
-  "properties":[
+  "propertyValues":[
     {
       "kind": "PropertyValue",
       "name": "MaxComponents",
