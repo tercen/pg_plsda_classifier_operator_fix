@@ -15,7 +15,7 @@
     {
       "kind": "PropertyValue",
       "name": "MaxComponents",
-      "value": 3
+      "value": "3"
     }
   ]
 }
