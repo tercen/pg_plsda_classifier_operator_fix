@@ -1,13 +1,20 @@
 {
   "kind": "OperatorUnitTest",
   "name": "test",
-  "namespace": "ds0",
+  "namespace": "ds1",
   "inputDataUri": "crabs-long.csv",
-  "outputDataUri": ["table1.csv","table2.csv","table3.csv"],
-  "columns": ["sex"],
+  "outputDataUri": ["table_1.csv","table_2.csv","table_3.csv", "table_4.csv", "table_5.csv"],
+  "columns": ["observation"],
   "rows": ["variable"],
-  "colors": [],
+  "colors": ["sex"],
   "labels": [],
   "yAxis": "measurement",
-  "xAxis": ""
+  "xAxis": "",
+  "skipColumns":[".content"],
+  "properties":[
+    {
+      "name":"MaxComponents",
+      "value":"3"
+    }
+  ]
 }
