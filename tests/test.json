@@ -13,8 +13,9 @@
   "skipColumns":[".content"],
   "properties":[
     {
-      "name":"MaxComponents",
-      "value":"3"
+      "kind": "PropertyValue",
+      "name": "MaxComponents",
+      "value": "3"
     }
   ]
 }
