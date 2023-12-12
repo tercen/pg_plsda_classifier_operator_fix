@@ -7,10 +7,15 @@ library(tim)
 
 MCR_PATH <- "/opt/mcr/v99"
 MATCALL  <- "/mcr/exe/run_plsda.sh"
+
+#MCR_PATH <- "/home/rstudio/mcr/v99"
+#MATCALL  <- "/home/rstudio/plsda_exe/run_plsda.sh"
+# chmod +x /home/rstudio/plsda_exe/run_plsda.sh 
+# chmod +x /home/rstudio/plsda_exe/plsda 
 # =============================================
-# http://127.0.0.1:5402/test-team/w/bddd3c84d46cb31435843a71c207aff5/ds/6741c225-bbc6-4ecb-ab04-8390c856d0c0
-# options("tercen.workflowId" = "bddd3c84d46cb31435843a71c207aff5")
-# options("tercen.stepId"     = "6741c225-bbc6-4ecb-ab04-8390c856d0c0")
+# http://127.0.0.1:5400/test/w/e661aaed87b1878293dbebb15203e6e8/ds/83c25e39-3a03-4f7a-9a61-c71340b4ddb6
+#options("tercen.workflowId" = "e661aaed87b1878293dbebb15203e6e8")
+#options("tercen.stepId"     = "83c25e39-3a03-4f7a-9a61-c71340b4ddb6")
 
 
 get_operator_props <- function(ctx, imagesFolder){
@@ -62,6 +67,8 @@ get_operator_props <- function(ctx, imagesFolder){
   if( is.null(DiagnosticPlot) ){
     DiagnosticPlot <- "Advanced"
   }
+  
+  MaxComponents <- ctx$op.value('MaxComponents', as.integer, 10)
   
   if( is.null(MaxComponents) || MaxComponents == -1 ){
     MaxComponents <- 10
@@ -156,7 +163,7 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
                       "data"=pull(df, ".y")
                     ) ))
   
-  
+  browser()
   
   jsonData <- toJSON(dfJson, pretty=TRUE, auto_unbox = TRUE, digits=20)
   
@@ -169,9 +176,10 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   # NOTE
   # It is unlikely that the processing takes over 10 minutes to finish,
   # but if it does, this safeguard needs to be changed
+  browser()
   ec <- system2(MATCALL,
           args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600)
-
+  
   # Error code 124 --> Timeout Happened
   if( ec == 124 ){
     stop(
