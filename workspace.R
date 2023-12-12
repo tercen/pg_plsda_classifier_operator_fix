@@ -11,7 +11,7 @@ library(tim)
 # SHORT
 # http://127.0.0.1:5400/test/w/fa9693eadcf11adb6a2d7ee1940008f2/ds/8a8d9785-50b2-4248-9a60-f4a0338303c7
 options("tercen.workflowId" = "fa9693eadcf11adb6a2d7ee1940008f2")
-options("tercen.stepId"     = "8a8d9785-50b2-4248-9a60-f4a0338303c7")
+# options("tercen.stepId"     = "8a8d9785-50b2-4248-9a60-f4a0338303c7")
 # options("tercen.stepId"     = "9e862a38-d54e-4fec-b872-9777eb588fa0")
 MCR_PATH <- "/home/rstudio/mcr/v99"
 MATCALL  <- "/home/rstudio/plsda_exe/run_plsda.sh"
