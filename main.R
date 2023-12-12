@@ -71,7 +71,7 @@ get_operator_props <- function(ctx, imagesFolder){
   MaxComponents <- ctx$op.value('MaxComponents', as.integer, 10)
   
   if( is.null(MaxComponents) || MaxComponents == -1 ){
-    MaxComponents <- 10
+    MaxComponents <- 3
   }
   
   if( is.null(Permutations) || Permutations == -1 ){
