@@ -178,7 +178,7 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   ec <- system2(MATCALL,
           args=c(MCR_PATH, paste0("--infile=", jsonFile[1], "")), timeout=600)
   
-
+  print(paste0("Matlab call finished with code ", ec))
   
   # Error code 124 --> Timeout Happened
   if( ec == 124 ){
