@@ -121,8 +121,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     "DiagnosticPlotPath"=outfileImg,
     "RowFactor"="ID", # "rowColumns[[  length(rowColumns)  ]],
     "ColFactor"=arrayColumns[[ length(arrayColumns) ]],
-    "OutputFileMat"=outfileMat, 
-    "OutputFileTxt"=outfileTxt )
+    "OutputFileVis"=outfileMat, 
+    "OutputFileDat"=outfileTxt )
   )
   
   
