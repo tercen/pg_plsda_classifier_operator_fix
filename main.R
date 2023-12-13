@@ -14,8 +14,8 @@ MATCALL  <- "/mcr/exe/run_plsda.sh"
 # chmod +x /home/rstudio/plsda_exe/plsda 
 # =============================================
 # http://127.0.0.1:5400/test/w/e661aaed87b1878293dbebb15203e6e8/ds/83c25e39-3a03-4f7a-9a61-c71340b4ddb6
-#options("tercen.workflowId" = "e661aaed87b1878293dbebb15203e6e8")
-#options("tercen.stepId"     = "83c25e39-3a03-4f7a-9a61-c71340b4ddb6")
+# options("tercen.workflowId" = "e661aaed87b1878293dbebb15203e6e8")
+# options("tercen.stepId"     = "83c25e39-3a03-4f7a-9a61-c71340b4ddb6")
 
 
 get_operator_props <- function(ctx, imagesFolder){
@@ -68,8 +68,7 @@ get_operator_props <- function(ctx, imagesFolder){
     DiagnosticPlot <- "Advanced"
   }
   
-  MaxComponents <- ctx$op.value('MaxComponents', as.integer, 10)
-  
+
   if( is.null(MaxComponents) || MaxComponents == -1 ){
     MaxComponents <- 3
   }
@@ -120,7 +119,7 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     "QuantitationType"=props$QuantitationType,
     "DiagnosticPlot"=props$DiagnosticPlot,
     "DiagnosticPlotPath"=outfileImg,
-    "RowFactor"=rowColumns[[  length(rowColumns)  ]],
+    "RowFactor"="ID", # "rowColumns[[  length(rowColumns)  ]],
     "ColFactor"=arrayColumns[[ length(arrayColumns) ]],
     "OutputFileMat"=outfileMat, 
     "OutputFileTxt"=outfileTxt )
@@ -139,7 +138,7 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
   for( rowCol in rowColumns ){
     dfJson <- append( dfJson,
                       list(list(
-                        "name"=rowCol,
+                        "name"="ID", #rowCol, # Might be multiple....
                         "type"="Spot",
                         "data"=pull(df, rowCol)
                       ))
@@ -163,22 +162,23 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
                       "data"=pull(df, ".y")
                     ) ))
   
-  browser()
   
   jsonData <- toJSON(dfJson, pretty=TRUE, auto_unbox = TRUE, digits=20)
   
   jsonFile <- tempfile(fileext = ".json")
   
   write(jsonData, jsonFile)
-  # write(jsonData, 'test.json')
-  # browser()
+  #write(jsonData, 'test.json')
+  
   
   # NOTE
   # It is unlikely that the processing takes over 10 minutes to finish,
   # but if it does, this safeguard needs to be changed
-  browser()
+  
   ec <- system2(MATCALL,
-          args=c(MCR_PATH, " \"--infile=", jsonFile[1], "\""), timeout=600)
+          args=c(MCR_PATH, paste0("--infile=", jsonFile[1], "")), timeout=600)
+  
+
   
   # Error code 124 --> Timeout Happened
   if( ec == 124 ){
@@ -188,6 +188,7 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
       HINT: Try increasing memory or CPU's for the operator"
     )
   }
+  
   
   outDf <- as.data.frame( read.csv(outfileTxt) )
   outDf <- outDf %>%
