@@ -8,8 +8,8 @@ library(tim)
 MCR_PATH <- "/opt/mcr/v99"
 MATCALL  <- "/mcr/exe/run_plsda.sh"
 
-#MCR_PATH <- "/home/rstudio/mcr/v99"
-#MATCALL  <- "/home/rstudio/plsda_exe/run_plsda.sh"
+# MCR_PATH <- "/home/rstudio/mcr/v99"
+# MATCALL  <- "/home/rstudio/plsda_exe/run_plsda.sh"
 # chmod +x /home/rstudio/plsda_exe/run_plsda.sh 
 # chmod +x /home/rstudio/plsda_exe/plsda 
 # =============================================
@@ -29,11 +29,16 @@ get_operator_props <- function(ctx, imagesFolder){
   Optimization<- "auto"
   QuantitationType <- "median"
   DiagnosticPlot <- "Advanced"
+  DebugTest <- "No"
   
   
   operatorProps <- ctx$query$operatorSettings$operatorRef$propertyValues
   
   for( prop in operatorProps ){
+    if (prop$name == "DebugTest"){
+      DebugTest <- prop$value
+    }
+    
     if (prop$name == "MaxComponents"){
       MaxComponents <- as.numeric(prop$value)
     }
@@ -94,6 +99,8 @@ get_operator_props <- function(ctx, imagesFolder){
   props$Optimization<- Optimization
   props$QuantitationType <- QuantitationType
   props$DiagnosticPlot <- DiagnosticPlot
+  
+  props$DebugTest <- DebugTest
   
   
   return (props)
@@ -243,6 +250,8 @@ colNames  <- ctx$cnames
 rowNames  <- ctx$rnames
 colorCols <- ctx$colors
 
+
+
 df <- ctx$select(c(".ci", ".ri", ".y", colorCols))
   
 df[[colorCols[[1]]]] <- as.character( df[[colorCols[[1]]]])
@@ -291,6 +300,11 @@ for( i in seq(1, length(rowNames))){
 
 
 props     <- get_operator_props(ctx, imgInfo[1])
+
+if(props$DebugTest == "Yes"){
+  ctx$requestResources(nCpus=1, ram=500000000, ram_per_cpu=500000000)
+}
+  
 
 tableList <- df %>%
   classify(props, unlist(colNames), unlist(rowNames), unlist(colorCols) ) 
