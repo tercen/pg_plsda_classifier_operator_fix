@@ -121,8 +121,8 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     "DiagnosticPlotPath"=outfileImg,
     "RowFactor"="ID", # "rowColumns[[  length(rowColumns)  ]],
     "ColFactor"=arrayColumns[[ length(arrayColumns) ]],
-    "OutputFileVis"=outfileMat, 
-    "OutputFileDat"=outfileTxt )
+    "OutputFileMat"=outfileMat, 
+    "OutputFileTxt"=outfileTxt )
   )
   
   
@@ -189,7 +189,7 @@ classify <- function(df, props, arrayColumns, rowColumns, colorColumns){
     )
   }
   
-  
+
   outDf <- as.data.frame( read.csv(outfileTxt) )
   outDf <- outDf %>%
     rename(.ci = colSeq) %>%
