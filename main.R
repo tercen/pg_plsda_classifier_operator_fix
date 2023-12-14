@@ -10,7 +10,7 @@ MATCALL  <- "/mcr/exe/run_plsda.sh"
 
 # MCR_PATH <- "/home/rstudio/mcr/v99"
 # MATCALL  <- "/home/rstudio/plsda_exe/run_plsda.sh"
-# chmod +x /home/rstudio/plsda_exe/run_plsda.sh 
+# chmod +x /home/rstudio/plsda_exe/run_plsda.sh C
 # chmod +x /home/rstudio/plsda_exe/plsda 
 # =============================================
 # http://127.0.0.1:5400/test/w/e661aaed87b1878293dbebb15203e6e8/ds/83c25e39-3a03-4f7a-9a61-c71340b4ddb6
@@ -29,7 +29,7 @@ get_operator_props <- function(ctx, imagesFolder){
   Optimization<- "auto"
   QuantitationType <- "median"
   DiagnosticPlot <- "Advanced"
-  DebugTest <- "No"
+  DebugTest <- "Yes"
   
   
   operatorProps <- ctx$query$operatorSettings$operatorRef$propertyValues
@@ -302,7 +302,8 @@ for( i in seq(1, length(rowNames))){
 props     <- get_operator_props(ctx, imgInfo[1])
 
 if(props$DebugTest == "Yes"){
-  ctx$requestResources(nCpus=1, ram=500000000, ram_per_cpu=500000000)
+  memReq = 0.5 * 1000 * 1000 * 1000
+  ctx$requestResources(nCpus=1, ram=memReq, ram_per_cpu=memReq)
 }
   
 
