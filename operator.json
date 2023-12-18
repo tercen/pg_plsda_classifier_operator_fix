@@ -61,13 +61,6 @@
       "defaultValue": "Advanced",
       "description": "",
       "values": ["None", "Basic", "Advanced"]
-    },
-    {
-      "kind": "EnumeratedProperty",
-      "name": "DebugTest",
-      "defaultValue": "No",
-      "description": "",
-      "values": ["No", "Yes"]
     }
   ]
 }

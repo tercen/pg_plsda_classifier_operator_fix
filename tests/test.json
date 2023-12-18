@@ -21,11 +21,6 @@
       "kind": "PropertyValue",
       "name": "DiagnosticPlot",
       "value": "None"
-    },
-    {
-      "kind": "PropertyValue",
-      "name": "DebugTest",
-      "value": "Yes"
     }
   ],
   "relTol": 1e-05

@@ -29,16 +29,12 @@ get_operator_props <- function(ctx, imagesFolder){
   Optimization<- "auto"
   QuantitationType <- "median"
   DiagnosticPlot <- "Advanced"
-  DebugTest <- "Yes"
-  
+
   
   operatorProps <- ctx$query$operatorSettings$operatorRef$propertyValues
   
   for( prop in operatorProps ){
-    if (prop$name == "DebugTest"){
-      DebugTest <- prop$value
-    }
-    
+
     if (prop$name == "MaxComponents"){
       MaxComponents <- as.numeric(prop$value)
     }
@@ -100,8 +96,7 @@ get_operator_props <- function(ctx, imagesFolder){
   props$QuantitationType <- QuantitationType
   props$DiagnosticPlot <- DiagnosticPlot
   
-  props$DebugTest <- DebugTest
-  
+
   
   return (props)
 }
