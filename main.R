@@ -301,10 +301,10 @@ for( i in seq(1, length(rowNames))){
 
 props     <- get_operator_props(ctx, imgInfo[1])
 
-if(props$DebugTest == "Yes"){
-  memReq = 0.5 * 1000 * 1000 * 1000
-  ctx$requestResources(nCpus=1, ram=memReq, ram_per_cpu=memReq)
-}
+#if(props$DebugTest == "Yes"){
+ # memReq = 0.5 * 1000 * 1000 * 1000
+#  ctx$requestResources(nCpus=1, ram=memReq, ram_per_cpu=memReq)
+#}
   
 
 tableList <- df %>%
